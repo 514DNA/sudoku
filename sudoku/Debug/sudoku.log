@@ -1,7 +1,3 @@
 ﻿  sudoku.cpp
-e:\软件工程作业\sudoku\sudoku\sudoku.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-e:\软件工程作业\sudoku\sudoku\sudoku.cpp(850): warning C4101: “num_flag”: 未引用的局部变量
-e:\软件工程作业\sudoku\sudoku\sudoku.cpp(885): warning C4101: “buf”: 未引用的局部变量
-e:\软件工程作业\sudoku\sudoku\sudoku.cpp(360): warning C4715: “sudoku::arrange_result”: 不是所有的控件路径都返回值
   sudoku.vcxproj -> E:\软件工程作业\sudoku\Debug\sudoku.exe
   sudoku.vcxproj -> E:\软件工程作业\sudoku\Debug\sudoku.pdb (Partial PDB)

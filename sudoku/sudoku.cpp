@@ -1,5 +1,3 @@
-// sudoku.cpp: 定义控制台应用程序的入口点。
-//
 
 #include "stdafx.h"
 #include <iostream>
@@ -37,7 +35,7 @@ public:
 	{
 		int i = 0;
 		int j = 0;
-		fopen_s(&output, "sudoku1.txt", "w");
+		fopen_s(&output, "sudoku.txt", "w");
 		file_buf_top = 0;
 /*		if (output == NULL)
 			cout << "shit" << endl;*/
@@ -114,7 +112,7 @@ public:
 			for (j = 0; j < 9; j++)
 				data[i][j] = back_data[i][j];
 	}
-	void print_sudoku()
+	void print_sudoku(int mode)
 	{
 		int i = 0;
 		int j = 0;
@@ -127,6 +125,8 @@ public:
 		for (i = 0; i < 9; i++)
 			for (j = 0; j < 9; j++)
 				File_buf[(i * 9 + j) << 1] = '0'+data[i][j];
+		if (mode)
+			File_buf[161] = '\0';
 		fputs(File_buf,output);
 	}
 	void print_arrange()
@@ -357,6 +357,7 @@ public:
 			i++;
 			j--;
 		}
+		return 1;
 	}
 	void arrange()
 	{
@@ -551,8 +552,6 @@ public:
 			{
 				fscanf_s(fp, "%d", &num);
 				c = getc(fp);
-				if (c == EOF)
-					return 0;
 	//			std::cout << num << std::endl;
 				data[i][j] = num;
 				if (num != 0)
@@ -563,7 +562,18 @@ public:
 					row_target[j] |= num_bit;
 					squared_target[squared] |= num_bit;
 				}
+				if (c == EOF)
+				{
+					File_buf[161] = '\0';
+					return 0;
+				}
 			}
+		c = getc(fp);
+		if (c == EOF)
+		{
+			File_buf[161] = '\0';
+			return 0;
+		}
 		return 1;
 
 	}
@@ -769,10 +779,10 @@ public:
 									break;
 								else
 									buf_top--;
-								if (buf_top < 5)
+/*								if (buf_top < 5)
 								{
 									print_sudoku();
-								}
+								}*/
 	//							print_sudoku();
 							}
 						}
@@ -842,12 +852,11 @@ public:
 			}
 //			print_sudoku();
 		}
-		print_sudoku();
+		print_sudoku(0);
 	}
 	void create_sudoku(int n)
 	{
 		int i = 0,j=0,k=0;
-		int num_flag[3];
 		for (i = 0; i < n;)
 		{
 			init_sudoku();
@@ -863,14 +872,14 @@ public:
 			for (j = 0; j < 9; j++)
 				for (k = 0; k < 9; k++)
 					data[j][k] = result_flag[(back_data[j][k] - 1)];
-			print_sudoku();
+			print_sudoku(i==(n - 1));
 			i++;
 			while (i<n&&arrange_result())
 			{
 				for (j = 0; j < 9; j++)
 					for (k = 0; k < 9; k++)
 						data[j][k] = result_flag[(back_data[j][k] - 1)];
-				print_sudoku();
+				print_sudoku(i==(n-1));
 				i++;
 				if (i >= n)
 					break;
@@ -882,7 +891,7 @@ public:
 	{
 start:
 		int num=1;
-		int buf[9],buf_length=0;
+		int buf_length=0;
 		int squared = 0;
 		int inner_addr = 0;
 		int addr = 0;
@@ -966,6 +975,7 @@ start:
 		{
 			solve_sudoku();
 		}
+		solve_sudoku();
 		fclose(fp);
 	}
 };
@@ -977,26 +987,53 @@ int main(int argc,char **argv)
 	int N = 0;
 	char c = 0;
 	FILE *fp;
-//	s0.create_sudoku(1000000);
 	if (!strcmp(argv[1],"-s"))
 	{
-		fopen_s(&fp, "argv[2]", "r");
+		fopen_s(&fp, argv[2], "r");
+		if (fp == NULL)
+		{
+			cout << "Can't open the file" << endl;
+			system("pause");
+			return -1;
+		}
 		s0.solve_all_soduku(fp);
 	}
 	else if (!strcmp(argv[1], "-c"))
 	{
+
 		while (argv[2][i] != '\0')
 		{
 			N *= 10;
+			if (argv[2][i]<'0' || argv[2][i]>'9')
+			{
+				cout << "argument error" << endl;
+				system("pause");
+				return -2;
+			}
 			N += (argv[2][i] - '0');
 			i++;
+			if (i > 16)
+			{
+				cout << "argument error" << endl;
+				system("pause");
+				return -3;
+
+			}
+		}
+		if (N < 1 || N>1000000)
+		{
+			cout << "argument error" << endl;
+			system("pause");
+			return -2;
 		}
 		s0.create_sudoku(N);
 	}
-/*	while (s0.arrange_result())
+	else
 	{
-		s0.print_arrange();
-	}*/
+		cout << "argument error" << endl;
+		system("pause");
+		return -2;
+	}
 	system("pause");
     return 0;
 }
