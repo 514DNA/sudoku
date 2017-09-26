@@ -116,19 +116,12 @@ public:
 	{
 		int i = 0;
 		int j = 0;
-/*		for (i = 0; i < 9; i++)
-		{
-			printf("%d %d %d %d %d %d %d %d %d\n", data[i][0], data[i][1], data[i][2], data[i][3], data[i][4], data[i][5], data[i][6], data[i][7], data[i][8]);
-//			std::cout << "\n";
-		}
-		std::cout << "\n";*/
 		for (i = 0; i < 9; i++)
 			for (j = 0; j < 9; j++)
 				File_buf[(i * 9 + j) << 1] = '0'+data[i][j];
 		if (mode)
 		{
 			File_buf[161] = '\0';
-//			print_sudoku_to_cmd();
 		}
 		fputs(File_buf,output);
 	}
@@ -751,7 +744,10 @@ public:
 							while (1)
 							{
 								if (buf_top == 0)
+								{
+									cout << "cant solve the puzzle" << endl;
 									return;
+								}
 								back_num = buf[buf_top - 1];
 								temp_addr = step[back_num];
 								line = temp_addr / 9;
@@ -876,10 +872,7 @@ public:
 				arrange();
 			loadin_super_squared();
 			find_another_fit_array(9);
-			fill_sudoku();
-//			arrange_result();
-//			print_sudoku();
-	//		arrange();
+			fill_sudoku();;
 			data_to_back();
 			for (j = 0; j < 9; j++)
 				for (k = 0; k < 9; k++)
