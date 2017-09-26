@@ -126,8 +126,20 @@ public:
 			for (j = 0; j < 9; j++)
 				File_buf[(i * 9 + j) << 1] = '0'+data[i][j];
 		if (mode)
+		{
 			File_buf[161] = '\0';
+//			print_sudoku_to_cmd();
+		}
 		fputs(File_buf,output);
+	}
+	void print_sudoku_to_cmd()
+	{
+		int i = 0;
+		int j = 0;
+		for (i = 0; i < 9; i++)
+			for (j = 0; j < 9; j++)
+				File_buf[(i * 9 + j) << 1] = '0' + data[i][j];
+		puts(File_buf);
 	}
 	void print_arrange()
 	{
@@ -987,13 +999,19 @@ int main(int argc,char **argv)
 	int N = 0;
 	char c = 0;
 	FILE *fp;
+	if (argc != 3)
+	{
+		cout << "argument number error" << endl;
+	//	system("pause");
+		return -4;
+	}
 	if (!strcmp(argv[1],"-s"))
 	{
 		fopen_s(&fp, argv[2], "r");
 		if (fp == NULL)
 		{
 			cout << "Can't open the file" << endl;
-			system("pause");
+	//		system("pause");
 			return -1;
 		}
 		s0.solve_all_soduku(fp);
@@ -1007,34 +1025,34 @@ int main(int argc,char **argv)
 			if (argv[2][i]<'0' || argv[2][i]>'9')
 			{
 				cout << "argument error" << endl;
-				system("pause");
+			//	system("pause");
 				return -2;
 			}
 			N += (argv[2][i] - '0');
 			i++;
 			if (i > 16)
 			{
-				cout << "argument error" << endl;
-				system("pause");
+				cout << "argument value error" << endl;
+			//	system("pause");
 				return -3;
 
 			}
 		}
 		if (N < 1 || N>1000000)
 		{
-			cout << "argument error" << endl;
-			system("pause");
-			return -2;
+			cout << "argument value error" << endl;
+		//	system("pause");
+			return -3;
 		}
 		s0.create_sudoku(N);
 	}
 	else
 	{
 		cout << "argument error" << endl;
-		system("pause");
+	//	system("pause");
 		return -2;
 	}
-	system("pause");
+//	system("pause");
     return 0;
 }
 
