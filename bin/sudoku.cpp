@@ -27,7 +27,7 @@ private:
 	int is_new_array;
 	int result_flag[9];
 	char File_buf[164];
-	char file_buf[16400];
+	char file_buf[20000];
 	int file_buf_top = 0;
 	FILE *output;
 public:
@@ -111,6 +111,41 @@ public:
 		for (i = 0; i < 9; i++)
 			for (j = 0; j < 9; j++)
 				data[i][j] = back_data[i][j];
+	}
+	void data_to_buf()
+	{
+		int i = 0,j=0;
+		for (i = 0; i < 9; i++)
+		{
+			for (j = 0; j < 9; j++)
+			{
+				file_buf[file_buf_top] = '0' + data[i][j];
+				file_buf_top++;
+				file_buf[file_buf_top] = ' ';
+				file_buf_top++;
+			}
+			file_buf[file_buf_top-1] = '\n';
+		}
+		if (file_buf_top > 19500)
+		{
+			file_buf[file_buf_top] = '\0';
+			fputs(file_buf, output);
+			file_buf[0]= '\0';
+			file_buf_top=0;
+		}
+		else
+		{
+			file_buf[file_buf_top] = '\n';
+			file_buf_top++;
+		}
+	}
+	void clear_buf()
+	{
+		if (file_buf_top != 0)
+		{
+			file_buf[file_buf_top - 2] = '\0';
+			fputs(file_buf, output);
+		}
 	}
 	void print_sudoku(int mode)
 	{
@@ -553,27 +588,49 @@ public:
 		int squared = 0,num=0,num_bit=0;
 		init_sudoku();
 		for (i = 0; i < 9; i++)
+		{
 			for (j = 0; j < 9; j++)
 			{
 				fscanf_s(fp, "%d", &num);
-				c = getc(fp);
-	//			std::cout << num << std::endl;
+				c = fgetc(fp);
+				//			std::cout << num << std::endl;
 				data[i][j] = num;
 				if (num != 0)
 				{
-					num_bit = 1 << (num - 1);
-					squared = 3 * (i / 3) + j / 3;
-					line_target[i] |= num_bit;
-					row_target[j] |= num_bit;
-					squared_target[squared] |= num_bit;
+					if (num > 0 && num < 10)
+					{
+						num_bit = 1 << (num - 1);
+						squared = 3 * (i / 3) + j / 3;
+						line_target[i] |= num_bit;
+						row_target[j] |= num_bit;
+						squared_target[squared] |= num_bit;
+					}
+					else
+					{
+						data[i][j] = 0;
+						cout << "Warning: There is a number value illeagal" << endl;
+					}
 				}
+				if (c == EOF)
+				{
+					File_buf[161] = '\0';
+					if (i == 8 && j == 8)
+						return 1;
+					else
+						return 0;
+				}
+			}
+			while (c != '\n')
+			{
+				c = fgetc(fp);
 				if (c == EOF)
 				{
 					File_buf[161] = '\0';
 					return 0;
 				}
 			}
-		c = getc(fp);
+		}
+		c = fgetc(fp);
 		if (c == EOF)
 		{
 			File_buf[161] = '\0';
@@ -878,6 +935,7 @@ public:
 				for (k = 0; k < 9; k++)
 					data[j][k] = result_flag[(back_data[j][k] - 1)];
 			print_sudoku(i==(n - 1));
+//			data_to_buf();
 			i++;
 			while (i<n&&arrange_result())
 			{
@@ -885,12 +943,14 @@ public:
 					for (k = 0; k < 9; k++)
 						data[j][k] = result_flag[(back_data[j][k] - 1)];
 				print_sudoku(i==(n-1));
+//				data_to_buf();
 				i++;
 				if (i >= n)
 					break;
 			}
 			back_to_data();
 		}
+//		clear_buf();
 	}
 	void create_random_sudoku()
 	{
@@ -980,7 +1040,7 @@ start:
 		{
 			solve_sudoku();
 		}
-		solve_sudoku();
+//		solve_sudoku();
 		fclose(fp);
 	}
 };
@@ -1031,7 +1091,7 @@ int main(int argc,char **argv)
 
 			}
 		}
-		if (N < 1 || N>1000000)
+		if (N < 1 || N>100000000)
 		{
 			cout << "argument value error" << endl;
 		//	system("pause");
