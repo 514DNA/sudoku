@@ -5,6 +5,9 @@
 #include <time.h>
 #include <string>
 using namespace std;
+#define addr2line(addr) ((addr)/9)
+#define addr2row(addr) ((addr)%9)
+#define linerow2squared(line,row) (3*((line)/3)+((row)/3))
 class sudoku
 {
 private:
@@ -848,6 +851,199 @@ public:
 		}
 //		clear_buf();
 	}
+	int can_delete(int addr)
+	{
+		int result = 0;
+		int i, j, line, row,squared,num;
+		int temp_line, temp_row, temp_squared;
+		int temp_addr,temp_flag,num_bit;
+		line = addr2line(addr);
+		row = addr2row(addr);
+		squared = linerow2squared(line, row);
+		num = data[line][row];
+		num_bit = (1 << (num - 1));
+		temp_line = line;
+		if (num == 0)
+			return 0;
+		for (i = 0; i < 9; )
+		{
+			temp_row = i;
+			temp_squared = linerow2squared(temp_line, temp_row);
+			temp_flag = 0;
+			if (temp_row == row )
+			{
+				i++;
+				continue;
+			}
+			if (temp_squared == squared)
+			{
+				if (data[temp_line][temp_row] != 0 || (row_target[temp_row] & num_bit))
+				{
+					i++;
+					continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (squared_target[temp_squared] & num_bit)
+				{
+					i++;
+					continue;
+				}
+				else if (data[temp_line][temp_row] != 0||(row_target[temp_row] & num_bit))
+				{
+					i++;
+					continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		if (i >= 9)
+			return 1;
+
+		temp_row = row;
+		for (i = 0; i < 9; )
+		{
+			temp_line = i;
+			temp_squared = linerow2squared(temp_line, temp_row);
+			temp_flag = 0;
+			if (temp_line == line)
+			{
+				i++;
+				continue;
+			}
+			if (temp_squared == squared)
+			{
+				if (data[temp_line][temp_row] != 0 || (line_target[temp_line] & num_bit))
+				{
+					i++;
+					continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+			else
+			{
+				if (squared_target[temp_squared] & num_bit)
+				{
+					i++;
+					continue;
+				}
+				else if (data[temp_line][temp_row] != 0 || (line_target[temp_line] & num_bit))
+				{
+					i++;
+					continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		if (i >= 9)
+			return 2;
+
+		temp_squared = squared;
+		for (i = 0; i < 9; )
+		{
+			temp_line = squared / 3 + i / 3;
+			temp_row = squared % 3 + i % 3;
+			temp_flag = 0;
+			if (temp_line == line&&temp_row==row)
+			{
+				i++;
+				continue;
+			}
+			if (temp_line == line)
+			{
+				if (data[temp_line][temp_row] != 0 || (row_target[temp_row] & num_bit))
+				{
+					i++;
+					continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+			else if (temp_row == row)
+			{
+				if (data[temp_line][temp_row] != 0 || (line_target[temp_line] & num_bit))
+				{
+					i++;
+					continue;
+				}
+				else
+				{
+					break;
+				}
+
+			}
+			else
+			{
+				if (data[temp_line][temp_row] != 0 || ((row_target[temp_row]|line_target[temp_line]) & num_bit))
+				{
+					i++;
+					continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		if (i >= 9)
+			return 3;
+		if ((row_target[row] | line_target[line] | squared_target[squared]) == 0x1ff) {
+			return 4;
+		}
+		return 0;
+	}
+	void create_sudoku_puzzle()
+	{
+		int i = 0,j=0,rand_num=0,addr;
+		create_random_sudoku();
+		num_buf_length = 0;
+		for (i = 0; i < 9; i++)
+		{
+			line_target[i] = 0x1ff;
+			row_target[i] = 0x1ff;
+			squared_target[i] = 0x1ff;
+		}
+		j = 0;
+		while(1)
+		{
+			num_buf_length = 0;
+			for (i = 0; i < 81; i++)
+			{
+				if (can_delete(i))
+				{
+					num_buf[num_buf_length] = i;
+					num_buf_length++;
+				}
+			}
+	//		cout << num_buf_length << endl;
+			if (num_buf_length == 0)
+				break;
+			rand_num = rand() % num_buf_length;
+			addr = num_buf[rand_num];
+			cout << can_delete(addr) << endl;
+			clear_addr(addr);
+			j++;
+			print_sudoku_to_cmd();
+		}
+	//	cout << j << endl;
+		print_sudoku_to_cmd();
+	}
 	void create_random_sudoku()
 	{
 start:
@@ -995,13 +1191,54 @@ int main(int argc,char **argv)
 		}
 		s0.create_sudoku(N);
 	}
+	else if (!strcmp(argv[1], "-r"))
+	{
+		while (argv[2][i] != '\0')
+		{
+			N *= 10;
+			if (argv[2][i]<'0' || argv[2][i]>'9')
+			{
+				cout << "argument error" << endl;
+				//	system("pause");
+				return -2;
+			}
+			N += (argv[2][i] - '0');
+			i++;
+			if (i > 16)
+			{
+				cout << "argument value error" << endl;
+				//	system("pause");
+				return -3;
+
+			}
+		}
+		if (N < 1 || N>100000000)
+		{
+			cout << "argument value error" << endl;
+			//	system("pause");
+			return -3;
+		}
+		srand((int)time(0));
+		for (i = 0; i < N; i++)
+		{
+			s0.create_random_sudoku();
+			s0.print_sudoku_to_cmd();
+		}
+		system("pause");
+	}
+	else if (!strcmp(argv[1], "whosyourdaddy"))
+	{
+		srand((int)time(0));
+		for(i=0;i<1;i++)
+			s0.create_sudoku_puzzle();
+		system("pause");
+	}
 	else
 	{
 		cout << "argument error" << endl;
 	//	system("pause");
 		return -2;
 	}
-//	system("pause");
     return 0;
 }
 
