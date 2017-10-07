@@ -955,8 +955,8 @@ public:
 		temp_squared = squared;
 		for (i = 0; i < 9; )
 		{
-			temp_line = squared / 3 + i / 3;
-			temp_row = squared % 3 + i % 3;
+			temp_line = 3*(squared / 3) + i / 3;
+			temp_row = 3*(squared % 3) + i % 3;
 			temp_flag = 0;
 			if (temp_line == line&&temp_row==row)
 			{
@@ -1041,7 +1041,7 @@ public:
 			j++;
 			print_sudoku_to_cmd();
 		}
-	//	cout << j << endl;
+		cout << j << endl;
 		print_sudoku_to_cmd();
 	}
 	void create_random_sudoku()
