@@ -18,6 +18,9 @@ private:
 	int row_target[9];
 	int squared_target[9];
 	int back_data[9][9];
+	int back_line_target[9];
+	int back_row_target[9];
+	int back_squared_target[9];
 	int num_buf[81];
 	int num_buf_length;
 	int stack[9][9];
@@ -104,16 +107,27 @@ public:
 		int i = 0;
 		int j = 0;
 		for (i = 0; i < 9; i++)
+		{
 			for (j = 0; j < 9; j++)
 				back_data[i][j] = data[i][j];
+			back_line_target[i] = line_target[i];
+			back_row_target[i] = row_target[i];
+			back_squared_target[i] = squared_target[i];
+		}
+
 	}
 	void back_to_data()
 	{
 		int i = 0;
 		int j = 0;
 		for (i = 0; i < 9; i++)
+		{
 			for (j = 0; j < 9; j++)
 				data[i][j] = back_data[i][j];
+			line_target[i] = back_line_target[i];
+			row_target[i] = back_row_target[i];
+			squared_target[i] = back_squared_target[i];
+		}
 	}
 	void data_to_buf()
 	{
@@ -1008,6 +1022,78 @@ public:
 		}
 		return 0;
 	}
+	
+	int to_next(int i, int j, int n) {
+		if (j == 8) {
+			if (i == 8) {
+				n++;
+				return n;
+			}
+			else {
+				n = check_puzzle(i + 1, 0, n);
+			}
+		}
+		else {
+			n = check_puzzle(i, j + 1, n);
+		}
+		return n;
+	}
+
+	int check_puzzle(int i, int j, int n) {
+		if (data[i][j] != 0) {
+			n = to_next(i, j, n);
+		}
+		else
+		{
+			int k = 0, t = linerow2squared(i, j);
+			for (k = 0; k < 9; k++) {
+				int num_bit = 1 << k;
+				if ((line_target[i] | row_target[j] | squared_target[t]) & num_bit) {
+					continue;
+				}
+				else {
+					data[i][j] = k + 1;
+					row_target[j] |= num_bit;
+					line_target[i] |= num_bit;
+					squared_target[t] |= num_bit;
+					n = to_next(i, j, n);
+				}
+				clear_addr(i * 9 + j);
+			}
+		}
+		return n;
+	}
+
+
+
+	int can_delete_senior(int addr)
+	{
+		int line = addr2line(addr);
+		int row = addr2row(addr);
+		int squared = linerow2squared(line, row);
+		if (data[line][row] == 0) {
+			return 0;
+		}
+		else {
+			int result = 0;
+			data_to_back();
+			clear_addr(addr);
+			result = check_puzzle(0, 0, 0);
+			back_to_data();
+			if (result > 1) {
+				return 0;
+			}
+			else if (result == 0) {
+				return -1;
+			}
+			else {
+				return 5;
+			}
+		}
+	}
+
+
+
 	void create_sudoku_puzzle()
 	{
 		int i = 0,j=0,rand_num=0,addr;
@@ -1036,10 +1122,34 @@ public:
 				break;
 			rand_num = rand() % num_buf_length;
 			addr = num_buf[rand_num];
-			cout << can_delete(addr) << endl;
+	//		cout << can_delete(addr) << endl;
 			clear_addr(addr);
 			j++;
-			print_sudoku_to_cmd();
+	//		print_sudoku_to_cmd();
+		}
+		while (1)
+		{
+			num_buf_length = 0;
+			for (i = 0; i < 81; i++)
+			{
+				if (can_delete_senior(i)>0)
+				{
+					num_buf[num_buf_length] = i;
+					num_buf_length++;
+				}
+/*				if (can_delete_senior(i) == -1)
+					can_delete_senior(i);*/
+		//			cout << "shit" << endl;
+			}
+			//		cout << num_buf_length << endl;
+			if (num_buf_length == 0)
+				break;
+			rand_num = rand() % num_buf_length;
+			addr = num_buf[rand_num];
+	//		cout << can_delete_senior(addr) << endl;
+			clear_addr(addr);
+			j++;
+	//		print_sudoku_to_cmd();
 		}
 		cout << j << endl;
 		print_sudoku_to_cmd();

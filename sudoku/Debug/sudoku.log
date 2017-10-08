@@ -1,9 +1,5 @@
-﻿  stdafx.cpp
-e:\软件工程作业\sudoku\sudoku\stdafx.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-e:\软件工程作业\sudoku\sudoku\stdafx.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-e:\软件工程作业\sudoku\sudoku\targetver.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
-  sudoku.cpp
+﻿  sudoku.cpp
+e:\软件工程作业\sudoku\sudoku\sudoku.cpp(873): warning C4101: “temp_addr”: 未引用的局部变量
+e:\软件工程作业\sudoku\sudoku\sudoku.cpp(871): warning C4101: “j”: 未引用的局部变量
   sudoku.vcxproj -> E:\软件工程作业\sudoku\Debug\sudoku.exe
   sudoku.vcxproj -> E:\软件工程作业\sudoku\Debug\sudoku.pdb (Partial PDB)
-e:\软件工程作业\sudoku\sudoku\sudoku.cpp(414): warning C6001: 使用未初始化的内存“buf”。
-e:\软件工程作业\sudoku\sudoku\sudoku.cpp(995): warning C6262: 函数使用了堆栈的“33928”个字节: 超过了 /analyze:stacksize '16384'。 请考虑将某些数据移到堆中。
