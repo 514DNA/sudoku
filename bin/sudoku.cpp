@@ -869,11 +869,17 @@ public:
 	{
 		int i = 0, j = 0, k = 0;
 		init_sudoku();
+		arrange();
 		loadin_super_squared();
 		find_another_fit_array(9);
-		arrange();
+//		arrange();
 		fill_sudoku();
-		arrange();
+	/*	data_to_back();
+		for (j = 0; j < 9; j++)
+			for (k = 0; k < 9; k++)
+				data[j][k] = result_flag[(back_data[j][k] - 1)];*/
+	//	print_sudoku_to_cmd();
+	//	arrange();
 	}
 	int can_delete(int addr)
 	{
@@ -1107,8 +1113,8 @@ public:
 	void create_sudoku_puzzle(int n)
 	{
 restart:		int i = 0,j=0,rand_num=0,addr,k=0;
-//		create_random_sudoku();
-		create_test_sudoku();
+		create_random_sudoku();
+//		create_test_sudoku();
 		num_buf_length = 0;
 		for (i = 0; i < 9; i++)
 		{
@@ -1357,7 +1363,7 @@ int main(int argc,char **argv)
 	{
 		srand((int)time(0));
 		for(i=0;i<10000;i++)
-			s0.create_sudoku_puzzle(0);
+			s0.create_sudoku_puzzle(55);
 		system("pause");
 	}
 	else
