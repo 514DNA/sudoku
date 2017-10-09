@@ -925,7 +925,7 @@ public:
 			{
 				if (squared_target[temp_squared] & num_bit)
 				{
-					i++;
+					i+=3;
 					continue;
 				}
 				else if (data[temp_line][temp_row] != 0||(row_target[temp_row] & num_bit))
@@ -969,7 +969,7 @@ public:
 			{
 				if (squared_target[temp_squared] & num_bit)
 				{
-					i++;
+					i+=3;
 					continue;
 				}
 				else if (data[temp_line][temp_row] != 0 || (line_target[temp_line] & num_bit))
@@ -1084,13 +1084,51 @@ public:
 		return n;
 	}
 
+	void add_addr(int addr, int num) {
+		int line = addr2line(addr);
+		int row = addr2row(addr);
+		int square = linerow2squared(line, row);
+		int num_bit = 1 << (num - 1);
+		data[line][row] = num;
+		line_target[line] |= num_bit;
+		row_target[row] |= num_bit;
+		squared_target[square] |= num_bit;
+		return;
+	}
 
+	int init_check_puzzle() {
+		int i = 0, j = 0, k = 0, sign = 0;
+		for (i = 0; i < 9; i++) {
+			for (j = 0; j < 9; j++) {
+				if (data[i][j] != 0) {
+					continue;
+				}
+				for (k = 0; k < 9; k++) {
+					int num = k + 1;
+					int num_bit = 1 << k;
+					if ((line_target[i] | row_target[j] | squared_target[linerow2squared(i, j)])&num_bit) {
+						continue;
+					}
+					add_addr(i * 9 + j, num);
+					if (can_delete(i * 9 + j) == 0) {
+						clear_addr(i * 9 + j);
+					}
+					else {
+						sign = 1;
+						break;
+					}
+				}
+			}
+		}
+		return sign;
+	}
 
 	int can_delete_senior(int addr)
 	{
 		int line = addr2line(addr);
 		int row = addr2row(addr);
 		int squared = linerow2squared(line, row);
+		int sign = 0;
 		if (data[line][row] == 0) {
 			return 0;
 		}
@@ -1098,6 +1136,10 @@ public:
 			int result = 0;
 			data_to_back();
 			clear_addr(addr);
+			do {
+				sign = 0;
+				sign = init_check_puzzle();
+			} while (sign == 1);
 			result = check_puzzle(0, 0, 0);
 			back_to_data();
 			if (result > 1) {
@@ -1316,7 +1358,33 @@ start:
 		fclose(fp);
 	}
 };
+class arg_info
+{
+	/*	-c 0x1 0
+		-s 0x2 1
+		-n 0x4 2
+		-m 0x8 3
+		-r 0x10 4
+		-u 0x20 5
+	*/
+private:
+	int arg_bit;
+	int c_or_n_arg;
+	int m_arg;
+	int r_arg[2];
+	char *s_arg;
+public:
+	void set_arg_bit_on(int mode)
+	{
+		if (mode >= 0 && mode <= 5)
+			arg_bit |= (1 << mode);
+	}
+	int read_arg_info(int argc, char **argv)
+	{
 
+	}
+
+};
 int main(int argc,char **argv)
 {
 	class sudoku s0;
@@ -1410,7 +1478,7 @@ int main(int argc,char **argv)
 	{
 		srand((int)time(0));
 		for(i=0;i<10000;i++)
-			s0.create_sudoku_puzzle(0);
+			s0.create_sudoku_puzzle(55);
 		system("pause");
 	}
 	else

@@ -32,6 +32,8 @@ private:
 	int num_flag[3];
 	int is_new_array;
 	int result_flag[9];
+	int first_num_addr;
+	int first_num_max_addr;
 	char File_buf[164];
 	char file_buf[20000];
 	int file_buf_top = 0;
@@ -43,6 +45,8 @@ public:
 		int j = 0;
 		fopen_s(&output, "sudoku.txt", "w");
 		file_buf_top = 0;
+		first_num_addr = 0;
+		first_num_max_addr=0x9cf44d1;
 /*		if (output == NULL)
 			cout << "shit" << endl;*/
 		for (i = 0; i < 9; i++)
@@ -921,7 +925,7 @@ public:
 			{
 				if (squared_target[temp_squared] & num_bit)
 				{
-					i++;
+					i+=3;
 					continue;
 				}
 				else if (data[temp_line][temp_row] != 0||(row_target[temp_row] & num_bit))
@@ -965,7 +969,7 @@ public:
 			{
 				if (squared_target[temp_squared] & num_bit)
 				{
-					i++;
+					i+=3;
 					continue;
 				}
 				else if (data[temp_line][temp_row] != 0 || (line_target[temp_line] & num_bit))
@@ -1080,13 +1084,51 @@ public:
 		return n;
 	}
 
+	void add_addr(int addr, int num) {
+		int line = addr2line(addr);
+		int row = addr2row(addr);
+		int square = linerow2squared(line, row);
+		int num_bit = 1 << (num - 1);
+		data[line][row] = num;
+		line_target[line] |= num_bit;
+		row_target[row] |= num_bit;
+		squared_target[square] |= num_bit;
+		return;
+	}
 
+	int init_check_puzzle() {
+		int i = 0, j = 0, k = 0, sign = 0;
+		for (i = 0; i < 9; i++) {
+			for (j = 0; j < 9; j++) {
+				if (data[i][j] != 0) {
+					continue;
+				}
+				for (k = 0; k < 9; k++) {
+					int num = k + 1;
+					int num_bit = 1 << k;
+					if ((line_target[i] | row_target[j] | squared_target[linerow2squared(i, j)])&num_bit) {
+						continue;
+					}
+					add_addr(i * 9 + j, num);
+					if (can_delete(i * 9 + j) == 0) {
+						clear_addr(i * 9 + j);
+					}
+					else {
+						sign = 1;
+						break;
+					}
+				}
+			}
+		}
+		return sign;
+	}
 
 	int can_delete_senior(int addr)
 	{
 		int line = addr2line(addr);
 		int row = addr2row(addr);
 		int squared = linerow2squared(line, row);
+		int sign = 0;
 		if (data[line][row] == 0) {
 			return 0;
 		}
@@ -1094,6 +1136,10 @@ public:
 			int result = 0;
 			data_to_back();
 			clear_addr(addr);
+			do {
+				sign = 0;
+				sign = init_check_puzzle();
+			} while (sign == 1);
 			result = check_puzzle(0, 0, 0);
 			back_to_data();
 			if (result > 1) {
@@ -1177,6 +1223,45 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 		print_sudoku(0);
 //		print_sudoku_to_cmd();
 	}
+	int get_first_num_addr(int squared)
+	{
+		if (squared == 0)
+			return (first_num_addr >> 24);
+		else
+			return ((first_num_addr >> (24-(squared*3)))&0x7);
+	}
+	int get_first_num_max_addr(int squared)
+	{
+		if (squared == 0)
+			return (first_num_max_addr >> 24);
+		else
+			return ((first_num_max_addr >> (24 - (squared * 3))) & 0x7);
+	}
+	void set_first_num_addr_to_zero(int squared)
+	{
+		if (squared == 0)
+			first_num_addr &= 0xffffff;
+		else
+			first_num_addr &= ~((0x7)<<(24-(squared*3)));
+	}
+	void first_num_addr_to_next()
+	{
+		int i=8;
+		while (i >= 0)
+		{
+			first_num_addr += (1 << (3 * (8 - i)));
+			if (get_first_num_addr(i) < get_first_num_max_addr(i))
+			{
+				break;
+			}
+			else
+			{
+				set_first_num_addr_to_zero(i);
+				i--;
+			}
+		}
+
+	}
 	void create_random_sudoku()
 	{
 start:
@@ -1247,7 +1332,10 @@ start:
 					}
 
 				}
-				addr = num_buf[rand() % num_buf_length];
+				if (num == 1)
+					addr = num_buf[get_first_num_addr(squared)];
+				else
+					addr = num_buf[rand() % num_buf_length];
 				line = addr / 9;
 				row = addr % 9;
 				line_target[line] |= (1 << (num - 1));
@@ -1258,6 +1346,7 @@ start:
 				step_num++;
 			}
 		}
+		first_num_addr_to_next();
 	}
 	void solve_all_soduku(FILE *fp)
 	{
@@ -1269,7 +1358,33 @@ start:
 		fclose(fp);
 	}
 };
+class arg_info
+{
+	/*	-c 0x1 0
+		-s 0x2 1
+		-n 0x4 2
+		-m 0x8 3
+		-r 0x10 4
+		-u 0x20 5
+	*/
+private:
+	int arg_bit;
+	int c_or_n_arg;
+	int m_arg;
+	int r_arg[2];
+	char *s_arg;
+public:
+	void set_arg_bit_on(int mode)
+	{
+		if (mode >= 0 && mode <= 5)
+			arg_bit |= (1 << mode);
+	}
+	int read_arg_info(int argc, char **argv)
+	{
 
+	}
+
+};
 int main(int argc,char **argv)
 {
 	class sudoku s0;
