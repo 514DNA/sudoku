@@ -842,7 +842,7 @@ public:
 				arrange();
 			loadin_super_squared();
 			find_another_fit_array(9);
-			fill_sudoku();;
+			fill_sudoku();
 			data_to_back();
 			for (j = 0; j < 9; j++)
 				for (k = 0; k < 9; k++)
@@ -864,6 +864,16 @@ public:
 			back_to_data();
 		}
 //		clear_buf();
+	}
+	void create_test_sudoku()
+	{
+		int i = 0, j = 0, k = 0;
+		init_sudoku();
+		loadin_super_squared();
+		find_another_fit_array(9);
+		arrange();
+		fill_sudoku();
+		arrange();
 	}
 	int can_delete(int addr)
 	{
@@ -1094,10 +1104,11 @@ public:
 
 
 
-	void create_sudoku_puzzle()
+	void create_sudoku_puzzle(int n)
 	{
-		int i = 0,j=0,rand_num=0,addr;
-		create_random_sudoku();
+restart:		int i = 0,j=0,rand_num=0,addr,k=0;
+//		create_random_sudoku();
+		create_test_sudoku();
 		num_buf_length = 0;
 		for (i = 0; i < 9; i++)
 		{
@@ -1106,7 +1117,7 @@ public:
 			squared_target[i] = 0x1ff;
 		}
 		j = 0;
-		while(1)
+		while(j<n)
 		{
 			num_buf_length = 0;
 			for (i = 0; i < 81; i++)
@@ -1127,15 +1138,18 @@ public:
 			j++;
 	//		print_sudoku_to_cmd();
 		}
-		while (1)
+		k = 80;
+		while (j<n)
 		{
 			num_buf_length = 0;
-			for (i = 0; i < 81; i++)
+			for (i =k; i >0; i--)
 			{
 				if (can_delete_senior(i)>0)
 				{
 					num_buf[num_buf_length] = i;
 					num_buf_length++;
+					k = i - 1;
+					break;
 				}
 /*				if (can_delete_senior(i) == -1)
 					can_delete_senior(i);*/
@@ -1151,8 +1165,11 @@ public:
 			j++;
 	//		print_sudoku_to_cmd();
 		}
-		cout << j << endl;
-		print_sudoku_to_cmd();
+//		cout << j << endl;
+		if (j < n)
+			goto restart;
+		print_sudoku(0);
+//		print_sudoku_to_cmd();
 	}
 	void create_random_sudoku()
 	{
@@ -1339,8 +1356,8 @@ int main(int argc,char **argv)
 	else if (!strcmp(argv[1], "whosyourdaddy"))
 	{
 		srand((int)time(0));
-		for(i=0;i<1;i++)
-			s0.create_sudoku_puzzle();
+		for(i=0;i<10000;i++)
+			s0.create_sudoku_puzzle(0);
 		system("pause");
 	}
 	else
