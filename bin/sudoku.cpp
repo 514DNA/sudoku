@@ -1161,7 +1161,7 @@ public:
 
 
 
-	void create_sudoku_puzzle(int n)
+	void create_sudoku_puzzle(int n,int mode)
 	{
 restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 		create_random_sudoku();
@@ -1174,7 +1174,25 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 			squared_target[i] = 0x1ff;
 		}
 		j = 0;
-		while(j<n)
+		if (mode == 2)
+		{
+			for (i = 0; i < 81; i++)
+				num_buf[i] = i;
+			num_buf_length=81;
+			for (i = 0; i < n; i++)
+			{
+				if (num_buf_length == 0)
+					break;
+				rand_num = rand() % num_buf_length;
+				num_buf_length--;
+				addr = num_buf[rand_num];
+				clear_addr(addr);
+				num_buf[rand_num] = num_buf[num_buf_length];
+			}
+			print_sudoku(0);
+			return;
+		}
+		while(j<n||mode==1)
 		{
 			num_buf_length = 0;
 			for (i = 0; i < 81; i++)
@@ -1195,8 +1213,10 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 			j++;
 	//		print_sudoku_to_cmd();
 		}
+		if (mode==1)
+			return;
 		k = 80;
-		while (j<n)
+		while (j<n )
 		{
 			num_buf_length = 0;
 			for (i =k; i >0; i--)
@@ -1266,6 +1286,14 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 			}
 		}
 
+	}
+	void create_sudoku_puzzles(int block_num, int mode, int n)
+	{
+		int i = 0;
+		for (i = 0; i < n; i++)
+		{
+			create_sudoku_puzzle(block_num, mode);
+		}
 	}
 	void create_random_sudoku()
 	{
@@ -1417,7 +1445,7 @@ public:
 
 	int str2range_num(char *str) {
 		int sign = 0, num = 0, i = 0;
-		for (i = 0; i < strlen(str); i++) {
+		for (i = 0; i < (strlen(str)); i++) {
 			if (str[i] <= '9' && str[i] >= '0') {
 				num = num * 10 + (str[i] - '0');
 			}
@@ -1682,22 +1710,30 @@ public:
 				srand((int)time(0));
 				if (arg_bit & 0x8)
 				{
-					for (i = 0; i<c_or_n_arg; i++)
-						s0.create_sudoku_puzzle(55);
+					if (m_arg == 1)
+						s0.create_sudoku_puzzles(35, 0, c_or_n_arg);
+					else if(m_arg==2)
+						s0.create_sudoku_puzzles(35, 1, c_or_n_arg);
+					else if (m_arg == 3)
+						s0.create_sudoku_puzzles(55, 0, c_or_n_arg);
+/*					for (i = 0; i<c_or_n_arg; i++)
+						s0.create_sudoku_puzzle(55,0);*/
 					return;
 				}
 				else if (arg_bit & 0x10)
 				{
 					if (arg_bit & 0x20)
 					{
-						for (i = 0; i<c_or_n_arg; i++)
-							s0.create_sudoku_puzzle(r_arg[0]);
+						s0.create_sudoku_puzzles(r_arg[0], 0, c_or_n_arg);
+	/*					for (i = 0; i<c_or_n_arg; i++)
+							s0.create_sudoku_puzzle(r_arg[0],0);*/
 						return;
 					}
 					else
 					{
-						for (i = 0; i<c_or_n_arg; i++)
-							s0.create_sudoku_puzzle(r_arg[0]);
+						s0.create_sudoku_puzzles(r_arg[0], 2, c_or_n_arg);
+	/*					for (i = 0; i<c_or_n_arg; i++)
+							s0.create_sudoku_puzzle(r_arg[0],0);*/
 						return;
 					}
 				}
