@@ -1,4 +1,3 @@
-
 #include "stdafx.h"
 #include <iostream>
 #include <fstream>
@@ -8,6 +7,7 @@ using namespace std;
 #define addr2line(addr) ((addr)/9)
 #define addr2row(addr) ((addr)%9)
 #define linerow2squared(line,row) (3*((line)/3)+((row)/3))
+#define M 1024* 1024 *256
 class sudoku
 {
 private:
@@ -38,6 +38,8 @@ private:
 	char file_buf[20000];
 	int file_buf_top = 0;
 	FILE *output;
+	int **resultStore;
+	bool test = false;
 public:
 	sudoku()
 	{
@@ -46,9 +48,9 @@ public:
 		fopen_s(&output, "sudoku.txt", "w");
 		file_buf_top = 0;
 		first_num_addr = 0;
-		first_num_max_addr=0x9cf44d1;
-/*		if (output == NULL)
-			cout << "shit" << endl;*/
+		first_num_max_addr = 0x9cf44d1;
+		/*		if (output == NULL)
+		cout << "shit" << endl;*/
 		for (i = 0; i < 9; i++)
 		{
 			line_target[i] = 0;
@@ -63,7 +65,7 @@ public:
 			{
 				data[i][j] = 0;
 				num_buf[i * 9 + j] = 0;
-				step[i*9+ j] = 0;
+				step[i * 9 + j] = 0;
 			}
 		}
 		for (i = 0; i < 64; i++)
@@ -71,11 +73,11 @@ public:
 			flag[i][0] = i / 16;
 			flag[i][1] = 2 + ((i / 8) % 2) - (2 * (i / 32));
 			flag[i][2] = (i % 8) / 2;
-			flag[i][3] = 3-(flag[i][1] % 2 + (flag[i][2] / 2) * 2);
-			flag[i][4] = (!(flag[i][2] % 2)) + 2*(i % 2);
-			flag[i][5]= 3 - (flag[i][0] % 2 + (flag[i][4] / 2) * 2);
-/*			for (j = 0; j < 6; j++)
-				cout << flag[i][j] << " ";
+			flag[i][3] = 3 - (flag[i][1] % 2 + (flag[i][2] / 2) * 2);
+			flag[i][4] = (!(flag[i][2] % 2)) + 2 * (i % 2);
+			flag[i][5] = 3 - (flag[i][0] % 2 + (flag[i][4] / 2) * 2);
+			/*			for (j = 0; j < 6; j++)
+			cout << flag[i][j] << " ";
 			cout << "\n";*/
 		}
 		for (i = 0; i < 3; i++)
@@ -83,10 +85,10 @@ public:
 		step_num = 0;
 		is_new_array = 1;
 		result_flag[0] = 5;
-		for(i=1;i<5;i++)
+		for (i = 1; i<5; i++)
 			result_flag[i] = i;
-		for(;i<9;i++)
-			result_flag[i] = i+1;
+		for (; i<9; i++)
+			result_flag[i] = i + 1;
 		for (i = 0; i < 162; i++)
 		{
 			if ((i + 1) % 18 == 0)
@@ -104,7 +106,7 @@ public:
 	}
 	~sudoku()
 	{
-	//	cout << "sasa" << endl;
+		//	cout << "sasa" << endl;
 		fclose(output);
 	}
 	void close_file()
@@ -140,7 +142,7 @@ public:
 	}
 	void data_to_buf()
 	{
-		int i = 0,j=0;
+		int i = 0, j = 0;
 		for (i = 0; i < 9; i++)
 		{
 			for (j = 0; j < 9; j++)
@@ -150,14 +152,14 @@ public:
 				file_buf[file_buf_top] = ' ';
 				file_buf_top++;
 			}
-			file_buf[file_buf_top-1] = '\n';
+			file_buf[file_buf_top - 1] = '\n';
 		}
 		if (file_buf_top > 19500)
 		{
 			file_buf[file_buf_top] = '\0';
 			fputs(file_buf, output);
-			file_buf[0]= '\0';
-			file_buf_top=0;
+			file_buf[0] = '\0';
+			file_buf_top = 0;
 		}
 		else
 		{
@@ -179,12 +181,12 @@ public:
 		int j = 0;
 		for (i = 0; i < 9; i++)
 			for (j = 0; j < 9; j++)
-				File_buf[(i * 9 + j) << 1] = '0'+data[i][j];
+				File_buf[(i * 9 + j) << 1] = '0' + data[i][j];
 		if (mode)
 		{
 			File_buf[161] = '\0';
 		}
-		fputs(File_buf,output);
+		fputs(File_buf, output);
 	}
 	void print_sudoku_to_cmd()
 	{
@@ -216,7 +218,7 @@ public:
 			{
 				data[i][j] = 0;
 				num_buf[i * 9 + j] = 0;
-				step[i*9 + j] = 0;
+				step[i * 9 + j] = 0;
 			}
 		}
 		result_flag[0] = 5;
@@ -227,11 +229,11 @@ public:
 		for (i = 0; i < 64; i++)
 		{
 			flag[i][0] = i / 16;
-			flag[i][1] = 2 + ((i >>3) &1) - ((i >>5)<<1);
-			flag[i][2] = (i & 0x7) >>1;
-			flag[i][3] = 3 - ((flag[i][1] &1) + (flag[i][2]&0xfffffffe));
-			flag[i][4] = (!(flag[i][2] &1)) + ((i &1)<<1);
-			flag[i][5] = 3 - ((flag[i][0] &1) + (flag[i][4] &0xfffffffe));
+			flag[i][1] = 2 + ((i >> 3) & 1) - ((i >> 5) << 1);
+			flag[i][2] = (i & 0x7) >> 1;
+			flag[i][3] = 3 - ((flag[i][1] & 1) + (flag[i][2] & 0xfffffffe));
+			flag[i][4] = (!(flag[i][2] & 1)) + ((i & 1) << 1);
+			flag[i][5] = 3 - ((flag[i][0] & 1) + (flag[i][4] & 0xfffffffe));
 		}
 		for (i = 0; i < 3; i++)
 			num_flag[i] = 0;
@@ -246,7 +248,7 @@ public:
 		int num;
 		line = addr / 9;
 		row = addr % 9;
-		squared= 3 * (addr / 27) + (addr % 9) / 3;
+		squared = 3 * (addr / 27) + (addr % 9) / 3;
 		num = data[line][row];
 		data[line][row] = 0;
 		line_target[line] &= (~(1 << (num - 1)));
@@ -256,7 +258,7 @@ public:
 	}
 	void arrange(int count)
 	{
-		int i = 0, j = 0, temp = 0,temp0=0;
+		int i = 0, j = 0, temp = 0, temp0 = 0;
 		for (i = 0; i < 9; i++)
 			num_possibility_top[i] = 0;
 		i = 8;
@@ -265,10 +267,10 @@ public:
 		{
 			i--;
 			if (i == 0)
-			{		
+			{
 				for (j = 0; j < 9; j++)
 					super_squared[count][j] = j + 1;
-				if(count>0)
+				if (count>0)
 					arrange(count - 1);
 				return;
 			}
@@ -285,8 +287,8 @@ public:
 		while (i<j)
 		{
 			temp = super_squared[count][i];
-			super_squared[count][i]= super_squared[count][j];
-			super_squared[count][j]=temp;
+			super_squared[count][i] = super_squared[count][j];
+			super_squared[count][j] = temp;
 			i++;
 			j--;
 		}
@@ -296,7 +298,7 @@ public:
 		int i = 0, j = 0, temp = 0, temp0 = 0;
 		i = 8;
 		is_new_array = 0;
-		while (result_flag[i] <result_flag[i-1])
+		while (result_flag[i] <result_flag[i - 1])
 		{
 			i--;
 			if (i == 1)
@@ -327,7 +329,7 @@ public:
 	}
 	void loadin_super_squared()
 	{
-		int i = 0, j = 0, k = 0, p = 0,q=0, num_bit = 1;
+		int i = 0, j = 0, k = 0, p = 0, q = 0, num_bit = 1;
 		int line = 0, row = 0, squared = 0;
 		int buf[4];
 		for (i = 0; i < 3; i++)
@@ -372,7 +374,7 @@ public:
 		int line, row, squared;
 		step_num--;
 		addr = step[step_num];
-//		step[step_num] = 0;
+		//		step[step_num] = 0;
 		line = addr / 9;
 		row = addr % 9;
 		squared = 3 * (line / 3) + row / 3;
@@ -384,7 +386,7 @@ public:
 	}
 	int find_another_fit_array(int num)
 	{
-		int i = 0, j = 0,k=0,temp=0,addr=0;
+		int i = 0, j = 0, k = 0, temp = 0, addr = 0;
 		if (is_new_array)
 		{
 			while (i < 9)
@@ -393,9 +395,9 @@ public:
 				for (k = 0; k < 6; k++)
 				{
 					addr = num_possibility[i][num_possibility_top[i]][k];
-					if (num_flag[addr>>5] & (1 << (addr &0x1f)))
+					if (num_flag[addr >> 5] & (1 << (addr & 0x1f)))
 					{
-						temp = k+1;
+						temp = k + 1;
 						break;
 					}
 				}
@@ -404,32 +406,32 @@ public:
 					switch (temp)
 					{
 					case 1:
-						num_possibility_top[i]+=16;
+						num_possibility_top[i] += 16;
 						break;
 					case 2:
-						num_possibility_top[i]+=8;
+						num_possibility_top[i] += 8;
 						break;
 					case 3:
-						num_possibility_top[i]+=2;
+						num_possibility_top[i] += 2;
 						break;
 					case 4:
-						num_possibility_top[i]+=4;
+						num_possibility_top[i] += 4;
 						break;
 					default:
-						num_possibility_top[i]+=1;
+						num_possibility_top[i] += 1;
 						break;
 					}
-				//	num_possibility_top[i]++;
+					//	num_possibility_top[i]++;
 					while (num_possibility_top[i] >= 64)
 					{
 						num_possibility_top[i] = 0;
 						i--;
 						if (i < 0)
 							return 0;
-						for (k=0;k<6;k++)
+						for (k = 0; k<6; k++)
 						{
 							addr = num_possibility[i][num_possibility_top[i]][k];
-							num_flag[addr>>5] &= (~(1 << (addr&0x1f)));
+							num_flag[addr >> 5] &= (~(1 << (addr & 0x1f)));
 						}
 						num_possibility_top[i]++;
 					}
@@ -440,7 +442,7 @@ public:
 					{
 						addr = num_possibility[i][num_possibility_top[i]][k];
 						addr = num_possibility[i][num_possibility_top[i]][k];
-						num_flag[addr>>5] |= (1 << (addr&0x1f));
+						num_flag[addr >> 5] |= (1 << (addr & 0x1f));
 					}
 					i++;
 				}
@@ -492,8 +494,8 @@ public:
 	}
 	void fill_sudoku()
 	{
-		int i = 0,k=0,addr;
-		for (i=0;i<9;i++)
+		int i = 0, k = 0, addr;
+		for (i = 0; i<9; i++)
 		{
 			for (k = 0; k < 6; k++)
 			{
@@ -504,10 +506,10 @@ public:
 	}
 	int read_soduku(FILE *fp)
 	{
-//		FILE *fp;
+		//		FILE *fp;
 		int i = 0, j = 0;
 		char c;
-		int squared = 0,num=0,num_bit=0;
+		int squared = 0, num = 0, num_bit = 0;
 		init_sudoku();
 		for (i = 0; i < 9; i++)
 		{
@@ -563,10 +565,10 @@ public:
 	}
 	void solve_sudoku()
 	{
-		int i = 0,num=1,j=0,result_num=0,num_bit=0,temp_addr=0;
-		int line = 0, row = 0, squared = 0,is_fill_in=0;
-		int buf[81], buf_top = 0,back_num;
-		int blockflag = 0,solve_space=10,solve_addr=0,solve_num=0,temp[2],block_num=0;
+		int i = 0, num = 1, j = 0, result_num = 0, num_bit = 0, temp_addr = 0;
+		int line = 0, row = 0, squared = 0, is_fill_in = 0;
+		int buf[81], buf_top = 0, back_num;
+		int blockflag = 0, solve_space = 10, solve_addr = 0, solve_num = 0, temp[2], block_num = 0;
 		step_num = 0;
 		for (i = 0; i < 9; i++)
 			for (j = 0; j < 9; j++)
@@ -680,9 +682,9 @@ public:
 					}
 					for (j = 0; j < 9; )
 					{
-						line = 3*(squared/3)+j/3;
-						row = 3 * (squared%3) + j % 3;
-						if ((data[line][row] != 0)||(line_target[line]&num_bit)|| (row_target[row] & num_bit))
+						line = 3 * (squared / 3) + j / 3;
+						row = 3 * (squared % 3) + j % 3;
+						if ((data[line][row] != 0) || (line_target[line] & num_bit) || (row_target[row] & num_bit))
 						{
 							j++;
 							continue;
@@ -717,7 +719,7 @@ public:
 					{
 						squared = 3 * (i / 3) + j / 3;
 						blockflag = 0;
-						blockflag = ((line_target[i] | row_target[j] | squared_target[squared])^0x1ff);
+						blockflag = ((line_target[i] | row_target[j] | squared_target[squared]) ^ 0x1ff);
 						if (blockflag == 0)
 						{
 							while (1)
@@ -736,7 +738,7 @@ public:
 								while (step_num > back_num)
 								{
 									back_step();
-			//						print_sudoku();
+									//						print_sudoku();
 								}
 								num++;
 								temp[1] = ((line_target[line] | row_target[row] | squared_target[squared]) ^ 0x1ff);
@@ -757,7 +759,7 @@ public:
 										step[step_num] = temp_addr;
 										step_num++;
 										is_fill_in = 1;
-					//					print_sudoku();
+										//					print_sudoku();
 										break;
 									}
 									num++;
@@ -766,11 +768,11 @@ public:
 									break;
 								else
 									buf_top--;
-/*								if (buf_top < 5)
+								/*								if (buf_top < 5)
 								{
-									print_sudoku();
+								print_sudoku();
 								}*/
-	//							print_sudoku();
+								//							print_sudoku();
 							}
 						}
 						else
@@ -793,7 +795,7 @@ public:
 										solve_space = temp[1];
 										num = 1;
 										num_bit = 1;
-										for (; !(blockflag&num_bit) ; num++)
+										for (; !(blockflag&num_bit); num++)
 											num_bit <<= 1;
 										solve_num = num;
 									}
@@ -813,7 +815,7 @@ public:
 								step_num++;
 								is_fill_in = 1;
 							}
-						}						
+						}
 					}
 				}
 			}
@@ -827,7 +829,7 @@ public:
 					buf_top++;
 					line = solve_addr / 9;
 					row = solve_addr % 9;
-					squared = 3*(line / 3) + row / 3;
+					squared = 3 * (line / 3) + row / 3;
 					data[line][row] = solve_num;
 					num_bit = (1 << (solve_num - 1));
 					squared_target[squared] |= num_bit;
@@ -837,17 +839,17 @@ public:
 					step_num++;
 				}
 			}
-//			print_sudoku();
+			//			print_sudoku();
 		}
 		print_sudoku(0);
 	}
 	void create_sudoku(int n)
 	{
-		int i = 0,j=0,k=0;
+		int i = 0, j = 0, k = 0;
 		for (i = 0; i < n;)
 		{
 			init_sudoku();
-			if(i)
+			if (i)
 				arrange();
 			loadin_super_squared();
 			find_another_fit_array(9);
@@ -856,23 +858,26 @@ public:
 			for (j = 0; j < 9; j++)
 				for (k = 0; k < 9; k++)
 					data[j][k] = result_flag[(back_data[j][k] - 1)];
-			print_sudoku(i==(n - 1));
-//			data_to_buf();
+			print_sudoku(i == (n - 1));
+			//			data_to_buf();
 			i++;
 			while (i<n&&arrange_result())
 			{
 				for (j = 0; j < 9; j++)
 					for (k = 0; k < 9; k++)
 						data[j][k] = result_flag[(back_data[j][k] - 1)];
-				print_sudoku(i==(n-1));
-//				data_to_buf();
+				if (test) {
+					fold(resultStore[i]);
+				}
+				print_sudoku(i == (n - 1));
+				//				data_to_buf();
 				i++;
 				if (i >= n)
 					break;
 			}
 			back_to_data();
 		}
-//		clear_buf();
+		//		clear_buf();
 	}
 	void create_test_sudoku()
 	{
@@ -881,21 +886,21 @@ public:
 		arrange();
 		loadin_super_squared();
 		find_another_fit_array(9);
-//		arrange();
+		//		arrange();
 		fill_sudoku();
-	/*	data_to_back();
+		/*	data_to_back();
 		for (j = 0; j < 9; j++)
-			for (k = 0; k < 9; k++)
-				data[j][k] = result_flag[(back_data[j][k] - 1)];*/
-	//	print_sudoku_to_cmd();
-	//	arrange();
+		for (k = 0; k < 9; k++)
+		data[j][k] = result_flag[(back_data[j][k] - 1)];*/
+		//	print_sudoku_to_cmd();
+		//	arrange();
 	}
 	int can_delete(int addr)
 	{
 		int result = 0;
-		int i, j, line, row,squared,num;
+		int i, j, line, row, squared, num;
 		int temp_line, temp_row, temp_squared;
-		int temp_addr,temp_flag,num_bit;
+		int temp_addr, temp_flag, num_bit;
 		line = addr2line(addr);
 		row = addr2row(addr);
 		squared = linerow2squared(line, row);
@@ -909,7 +914,7 @@ public:
 			temp_row = i;
 			temp_squared = linerow2squared(temp_line, temp_row);
 			temp_flag = 0;
-			if (temp_row == row )
+			if (temp_row == row)
 			{
 				i++;
 				continue;
@@ -930,10 +935,10 @@ public:
 			{
 				if (squared_target[temp_squared] & num_bit)
 				{
-					i+=3;
+					i += 3;
 					continue;
 				}
-				else if (data[temp_line][temp_row] != 0||(row_target[temp_row] & num_bit))
+				else if (data[temp_line][temp_row] != 0 || (row_target[temp_row] & num_bit))
 				{
 					i++;
 					continue;
@@ -974,7 +979,7 @@ public:
 			{
 				if (squared_target[temp_squared] & num_bit)
 				{
-					i+=3;
+					i += 3;
 					continue;
 				}
 				else if (data[temp_line][temp_row] != 0 || (line_target[temp_line] & num_bit))
@@ -994,10 +999,10 @@ public:
 		temp_squared = squared;
 		for (i = 0; i < 9; )
 		{
-			temp_line = 3*(squared / 3) + i / 3;
-			temp_row = 3*(squared % 3) + i % 3;
+			temp_line = 3 * (squared / 3) + i / 3;
+			temp_row = 3 * (squared % 3) + i % 3;
 			temp_flag = 0;
-			if (temp_line == line&&temp_row==row)
+			if (temp_line == line&&temp_row == row)
 			{
 				i++;
 				continue;
@@ -1029,7 +1034,7 @@ public:
 			}
 			else
 			{
-				if (data[temp_line][temp_row] != 0 || ((row_target[temp_row]|line_target[temp_line]) & num_bit))
+				if (data[temp_line][temp_row] != 0 || ((row_target[temp_row] | line_target[temp_line]) & num_bit))
 				{
 					i++;
 					continue;
@@ -1047,7 +1052,7 @@ public:
 		}
 		return 0;
 	}
-	
+
 	int to_next(int i, int j, int n) {
 		if (j == 8) {
 			if (i == 8) {
@@ -1159,13 +1164,11 @@ public:
 		}
 	}
 
-
-
-	void create_sudoku_puzzle(int n,int mode)
+	void create_sudoku_puzzle(int n, int mode)
 	{
-restart:		int i = 0,j=0,rand_num=0,addr,k=0;
+	restart:		int i = 0, j = 0, rand_num = 0, addr, k = 0;
 		create_random_sudoku();
-//		create_test_sudoku();
+		//		create_test_sudoku();
 		num_buf_length = 0;
 		for (i = 0; i < 9; i++)
 		{
@@ -1178,7 +1181,7 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 		{
 			for (i = 0; i < 81; i++)
 				num_buf[i] = i;
-			num_buf_length=81;
+			num_buf_length = 81;
 			for (i = 0; i < n; i++)
 			{
 				if (num_buf_length == 0)
@@ -1189,10 +1192,13 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 				clear_addr(addr);
 				num_buf[rand_num] = num_buf[num_buf_length];
 			}
+			if (test) {
+				fold(resultStore[i]);
+			}
 			print_sudoku(0);
 			return;
 		}
-		while(j<n||mode==1)
+		while (j<n || mode == 1)
 		{
 			num_buf_length = 0;
 			for (i = 0; i < 81; i++)
@@ -1203,23 +1209,23 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 					num_buf_length++;
 				}
 			}
-	//		cout << num_buf_length << endl;
+			//		cout << num_buf_length << endl;
 			if (num_buf_length == 0)
 				break;
 			rand_num = rand() % num_buf_length;
 			addr = num_buf[rand_num];
-	//		cout << can_delete(addr) << endl;
+			//		cout << can_delete(addr) << endl;
 			clear_addr(addr);
 			j++;
-	//		print_sudoku_to_cmd();
+			//		print_sudoku_to_cmd();
 		}
-		if (mode==1)
+		if (mode == 1)
 			return;
 		k = 80;
-		while (j<n )
+		while (j<n)
 		{
 			num_buf_length = 0;
-			for (i =k; i >0; i--)
+			for (i = k; i >0; i--)
 			{
 				if (can_delete_senior(i)>0)
 				{
@@ -1228,32 +1234,35 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 					k = i - 1;
 					break;
 				}
-/*				if (can_delete_senior(i) == -1)
-					can_delete_senior(i);*/
-		//			cout << "shit" << endl;
+				/*				if (can_delete_senior(i) == -1)
+				can_delete_senior(i);*/
+				//			cout << "shit" << endl;
 			}
 			//		cout << num_buf_length << endl;
 			if (num_buf_length == 0)
 				break;
 			rand_num = rand() % num_buf_length;
 			addr = num_buf[rand_num];
-	//		cout << can_delete_senior(addr) << endl;
+			//		cout << can_delete_senior(addr) << endl;
 			clear_addr(addr);
 			j++;
-	//		print_sudoku_to_cmd();
+			//		print_sudoku_to_cmd();
 		}
-//		cout << j << endl;
+		//		cout << j << endl;
 		if (j < n)
 			goto restart;
+		if (test) {
+			fold(resultStore[i]);
+		}
 		print_sudoku(0);
-//		print_sudoku_to_cmd();
+		//		print_sudoku_to_cmd();
 	}
 	int get_first_num_addr(int squared)
 	{
 		if (squared == 0)
 			return (first_num_addr >> 24);
 		else
-			return ((first_num_addr >> (24-(squared*3)))&0x7);
+			return ((first_num_addr >> (24 - (squared * 3))) & 0x7);
 	}
 	int get_first_num_max_addr(int squared)
 	{
@@ -1267,11 +1276,11 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 		if (squared == 0)
 			first_num_addr &= 0xffffff;
 		else
-			first_num_addr &= ~((0x7)<<(24-(squared*3)));
+			first_num_addr &= ~((0x7) << (24 - (squared * 3)));
 	}
 	void first_num_addr_to_next()
 	{
-		int i=8;
+		int i = 8;
 		while (i >= 0)
 		{
 			first_num_addr += (1 << (3 * (8 - i)));
@@ -1297,13 +1306,13 @@ restart:		int i = 0,j=0,rand_num=0,addr,k=0;
 	}
 	void create_random_sudoku()
 	{
-start:
-		int num=1;
-		int buf_length=0;
+	start:
+		int num = 1;
+		int buf_length = 0;
 		int squared = 0;
 		int inner_addr = 0;
 		int addr = 0;
-		int i = 0,j=0,k=0,count=0;
+		int i = 0, j = 0, k = 0, count = 0;
 		int temp = 0;
 		int line;
 		int row;
@@ -1311,7 +1320,7 @@ start:
 		step_num = 0;
 		for (num = 1; num < 10; num++)
 		{
-	//		data_to_back();
+			//		data_to_back();
 			for (i = 0; i < 9; i++)
 				stack_top[i] = 0;
 			i = 1 << (num - 1);
@@ -1323,15 +1332,15 @@ start:
 					addr = inner_addr % 3 + 3 * (squared % 3) + 9 * (inner_addr / 3) + 27 * (squared / 3);
 					line = addr / 9;
 					row = addr % 9;
-					if (!((line_target[line] & i) || (row_target[row] & i)||data[line][row]!=0))
+					if (!((line_target[line] & i) || (row_target[row] & i) || data[line][row] != 0))
 					{
 						num_buf[num_buf_length] = addr;
 						num_buf_length++;
 					}
 				}
-//				cout << num_buf_length << endl;
-//				print_sudoku();
-				while (num_buf_length==0)
+				//				cout << num_buf_length << endl;
+				//				print_sudoku();
+				while (num_buf_length == 0)
 				{
 					step_num--;
 					squared--;
@@ -1357,7 +1366,7 @@ start:
 						for (j = 0; j < stack_top[squared]; j++)
 							if (addr == stack[squared][j])
 								temp = 1;
-						if (!((line_target[line] & i) || (row_target[row] & i) || data[line][row] != 0||temp))
+						if (!((line_target[line] & i) || (row_target[row] & i) || data[line][row] != 0 || temp))
 						{
 							num_buf[num_buf_length] = addr;
 							num_buf_length++;
@@ -1387,18 +1396,69 @@ start:
 		{
 			solve_sudoku();
 		}
-//		solve_sudoku();
+		//		solve_sudoku();
 		fclose(fp);
 	}
+	void generate(int number, int** result) {
+		resultStore = result;
+		test = true;
+		create_sudoku(number);
+		result = resultStore;
+	}
+	void generate(int number, int mode, int** result) {
+		resultStore = result;
+		test = true;
+		if (mode == 1)
+			create_sudoku_puzzles(35, 0, number);
+		else if (mode == 2)
+			create_sudoku_puzzles(35, 1, number);
+		else if (mode == 3)
+			create_sudoku_puzzles(55, 0, number);
+		result = resultStore;
+	}
+	void generate(int number, int lower, int upper, bool unique, int** result) {
+		resultStore = result;
+		test = true;
+		if (unique)
+			create_sudoku_puzzles(lower, 0, number);
+		else
+			create_sudoku_puzzles(lower, 2, number);
+		result = resultStore;
+	}
+
+	void unfold(int *puzzle) {
+		int i = 0, j = 0, k = 0;
+		for (i = 0; i < 9; i++) {
+			for (j = 0; j < 9; j++) {
+				data[i][j] = puzzle[k++];
+			}
+		}
+		return;
+	}
+
+	void fold(int *solution) {
+		int i = 0, j = 0, k = 0;
+		for (i = 0; i < 9; i++) {
+			for (j = 0; j < 9; j++) {
+				solution[k++] = data[i][j];
+			}
+		}
+	}
+	bool solve(int* puzzle, int* solution) {
+		unfold(puzzle);
+		solve_sudoku();
+		fold(solution);
+	}
 };
+
 class arg_info
 {
 	/*	-c 0x1 0
-		-s 0x2 1
-		-n 0x4 2
-		-m 0x8 3
-		-r 0x10 4
-		-u 0x20 5
+	-s 0x2 1
+	-n 0x4 2
+	-m 0x8 3
+	-r 0x10 4
+	-u 0x20 5
 	*/
 private:
 	int arg_bit;
@@ -1497,7 +1557,7 @@ public:
 
 	int read_arg_info(int argc, char **argv)
 	{
-		int i = 1,num=0, error = 0;
+		int i = 1, num = 0, error = 0;
 		if (argc < 3)
 		{
 			cout << "Error:" << endl;
@@ -1505,19 +1565,19 @@ public:
 		}
 		while (i < argc)
 		{
-			if (argv[i][0]!='\0'&&argv[i][1]!='\0'&&argv[i][0] == '-'&&argv[i][2] == '\0')
+			if (argv[i][0] != '\0'&&argv[i][1] != '\0'&&argv[i][0] == '-'&&argv[i][2] == '\0')
 			{
 				switch (argv[i][1])
 				{
 				case('c'):
 					/*i++;
 					if (i > 2)
-						return -1;
+					return -1;
 					num = str2num(argv[i]);
 					if (num < 0)
-						return num;
+					return num;
 					if (num > 1000000)
-						return -2;
+					return -2;
 					set_arg_bit_on(0);
 					c_or_n_arg = num;*/
 					if (arg_bit != 0) {
@@ -1565,7 +1625,7 @@ public:
 								return -2;
 								break;
 							}
-	//						FILE *fp;
+							//						FILE *fp;
 							fopen_s(&fp, path, "r");
 							if (!fp) {
 								return -2;
@@ -1574,7 +1634,7 @@ public:
 							else {
 								s_arg = path;
 								set_arg_bit_on(1);
-	//							fclose(fp);
+								//							fclose(fp);
 							}
 						}
 					}
@@ -1682,9 +1742,9 @@ public:
 		else
 			return -4;
 	}
-	void run_cmd(int argc,char **argv)
+	void run_cmd(int argc, char **argv)
 	{
-		int error=0;
+		int error = 0;
 		int i = 0;
 		class sudoku s0;
 		error = read_arg_info(argc, argv);
@@ -1712,12 +1772,12 @@ public:
 				{
 					if (m_arg == 1)
 						s0.create_sudoku_puzzles(35, 0, c_or_n_arg);
-					else if(m_arg==2)
+					else if (m_arg == 2)
 						s0.create_sudoku_puzzles(35, 1, c_or_n_arg);
 					else if (m_arg == 3)
 						s0.create_sudoku_puzzles(55, 0, c_or_n_arg);
-/*					for (i = 0; i<c_or_n_arg; i++)
-						s0.create_sudoku_puzzle(55,0);*/
+					/*					for (i = 0; i<c_or_n_arg; i++)
+					s0.create_sudoku_puzzle(55,0);*/
 					return;
 				}
 				else if (arg_bit & 0x10)
@@ -1725,128 +1785,128 @@ public:
 					if (arg_bit & 0x20)
 					{
 						s0.create_sudoku_puzzles(r_arg[0], 0, c_or_n_arg);
-	/*					for (i = 0; i<c_or_n_arg; i++)
-							s0.create_sudoku_puzzle(r_arg[0],0);*/
+						/*					for (i = 0; i<c_or_n_arg; i++)
+						s0.create_sudoku_puzzle(r_arg[0],0);*/
 						return;
 					}
 					else
 					{
 						s0.create_sudoku_puzzles(r_arg[0], 2, c_or_n_arg);
-	/*					for (i = 0; i<c_or_n_arg; i++)
-							s0.create_sudoku_puzzle(r_arg[0],0);*/
+						/*					for (i = 0; i<c_or_n_arg; i++)
+						s0.create_sudoku_puzzle(r_arg[0],0);*/
 						return;
 					}
 				}
 				return;
 			}
 		}
-	//	s0.close_file();
+		//	s0.close_file();
 	}
 };
-int main(int argc,char **argv)
+
+int main(int argc, char **argv)
 {
 	//class sudoku s0;
 	class arg_info a0;
-	int i = 0,j=0;
+	int i = 0, j = 0;
 	int N = 0;
 	char c = 0;
 	FILE *fp;
 	a0.run_cmd(argc, argv);
-/*	if (argc != 3)
+	/*	if (argc != 3)
 	{
-		cout << "argument number error" << endl;
+	cout << "argument number error" << endl;
 	//	system("pause");
-		return -4;
+	return -4;
 	}
 	if (!strcmp(argv[1],"-s"))
 	{
-		fopen_s(&fp, argv[2], "r");
-		if (fp == NULL)
-		{
-			cout << "Can't open the file" << endl;
+	fopen_s(&fp, argv[2], "r");
+	if (fp == NULL)
+	{
+	cout << "Can't open the file" << endl;
 	//		system("pause");
-			return -1;
-		}
-		s0.solve_all_soduku(fp);
+	return -1;
+	}
+	s0.solve_all_soduku(fp);
 	}
 	else if (!strcmp(argv[1], "-c"))
 	{
 
-		while (argv[2][i] != '\0')
-		{
-			N *= 10;
-			if (argv[2][i]<'0' || argv[2][i]>'9')
-			{
-				cout << "argument error" << endl;
-			//	system("pause");
-				return -2;
-			}
-			N += (argv[2][i] - '0');
-			i++;
-			if (i > 16)
-			{
-				cout << "argument value error" << endl;
-			//	system("pause");
-				return -3;
+	while (argv[2][i] != '\0')
+	{
+	N *= 10;
+	if (argv[2][i]<'0' || argv[2][i]>'9')
+	{
+	cout << "argument error" << endl;
+	//	system("pause");
+	return -2;
+	}
+	N += (argv[2][i] - '0');
+	i++;
+	if (i > 16)
+	{
+	cout << "argument value error" << endl;
+	//	system("pause");
+	return -3;
 
-			}
-		}
-		if (N < 1 || N>100000000)
-		{
-			cout << "argument value error" << endl;
-		//	system("pause");
-			return -3;
-		}
-		s0.create_sudoku(N);
+	}
+	}
+	if (N < 1 || N>100000000)
+	{
+	cout << "argument value error" << endl;
+	//	system("pause");
+	return -3;
+	}
+	s0.create_sudoku(N);
 	}
 	else if (!strcmp(argv[1], "-r"))
 	{
-		while (argv[2][i] != '\0')
-		{
-			N *= 10;
-			if (argv[2][i]<'0' || argv[2][i]>'9')
-			{
-				cout << "argument error" << endl;
-				//	system("pause");
-				return -2;
-			}
-			N += (argv[2][i] - '0');
-			i++;
-			if (i > 16)
-			{
-				cout << "argument value error" << endl;
-				//	system("pause");
-				return -3;
+	while (argv[2][i] != '\0')
+	{
+	N *= 10;
+	if (argv[2][i]<'0' || argv[2][i]>'9')
+	{
+	cout << "argument error" << endl;
+	//	system("pause");
+	return -2;
+	}
+	N += (argv[2][i] - '0');
+	i++;
+	if (i > 16)
+	{
+	cout << "argument value error" << endl;
+	//	system("pause");
+	return -3;
 
-			}
-		}
-		if (N < 1 || N>100000000)
-		{
-			cout << "argument value error" << endl;
-			//	system("pause");
-			return -3;
-		}
-		srand((int)time(0));
-		for (i = 0; i < N; i++)
-		{
-			s0.create_random_sudoku();
-			s0.print_sudoku_to_cmd();
-		}
-		system("pause");
+	}
+	}
+	if (N < 1 || N>100000000)
+	{
+	cout << "argument value error" << endl;
+	//	system("pause");
+	return -3;
+	}
+	srand((int)time(0));
+	for (i = 0; i < N; i++)
+	{
+	s0.create_random_sudoku();
+	s0.print_sudoku_to_cmd();
+	}
+	system("pause");
 	}
 	else if (!strcmp(argv[1], "whosyourdaddy"))
 	{
-		srand((int)time(0));
-		for(i=0;i<10000;i++)
-			s0.create_sudoku_puzzle(55);
-		system("pause");
+	srand((int)time(0));
+	for(i=0;i<10000;i++)
+	s0.create_sudoku_puzzle(55);
+	system("pause");
 	}
 	else
 	{
-		cout << "argument error" << endl;
+	cout << "argument error" << endl;
 	//	system("pause");
-		return -2;
+	return -2;
 	}*/
-    return 0;
+	return 0;
 }
-
