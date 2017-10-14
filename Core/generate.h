@@ -27,6 +27,7 @@ public:
 	void create_sudoku(int n);
 	void create_test_sudoku();
 
+	void set_play(bool a);
 	void create_sudoku_puzzle(int n, int mode);
 	void create_sudoku_puzzles(int block_num, int mode, int n);
 	void create_random_sudoku();
@@ -65,6 +66,7 @@ private:
 	FILE *output;
 	int **resultStore;
 	bool test = false;
+	bool play = false;
 	void unfold(int *puzzle);
 	void fold(int *solution);
 

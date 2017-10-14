@@ -8,8 +8,6 @@ Core::Core()
 	file_buf_top = 0;
 	first_num_addr = 0;
 	first_num_max_addr = 0x9cf44d1;
-	/*		if (output == NULL)
-	cout << "shit" << endl;*/
 	for (i = 0; i < 9; i++)
 	{
 		line_target[i] = 0;
@@ -35,9 +33,6 @@ Core::Core()
 		flag[i][3] = 3 - (flag[i][1] % 2 + (flag[i][2] / 2) * 2);
 		flag[i][4] = (!(flag[i][2] % 2)) + 2 * (i % 2);
 		flag[i][5] = 3 - (flag[i][0] % 2 + (flag[i][4] / 2) * 2);
-		/*			for (j = 0; j < 6; j++)
-		cout << flag[i][j] << " ";
-		cout << "\n";*/
 	}
 	for (i = 0; i < 3; i++)
 		num_flag[i] = 0;
@@ -850,9 +845,9 @@ void Core::create_test_sudoku()
 int Core::can_delete(int addr)
 {
 	int result = 0;
-	int i, j, line, row, squared, num;
+	int i, line, row, squared, num;
 	int temp_line, temp_row, temp_squared;
-	int temp_addr, temp_flag, num_bit;
+	int temp_flag, num_bit;
 	line = addr2line(addr);
 	row = addr2row(addr);
 	squared = linerow2squared(line, row);
@@ -1119,6 +1114,9 @@ void Core::create_sudoku_puzzle(int n, int mode)
 {
 restart:		int i = 0, j = 0, rand_num = 0, addr, k = 0;
 	create_random_sudoku();
+	if (play) {
+		fold(resultStore[0]);
+	}
 	num_buf_length = 0;
 	for (i = 0; i < 9; i++)
 	{
@@ -1141,9 +1139,6 @@ restart:		int i = 0, j = 0, rand_num = 0, addr, k = 0;
 			addr = num_buf[rand_num];
 			clear_addr(addr);
 			num_buf[rand_num] = num_buf[num_buf_length];
-		}
-		if (test) {
-			fold(resultStore[i]);
 		}
 		print_sudoku(0);
 		return;
@@ -1191,9 +1186,6 @@ restart:		int i = 0, j = 0, rand_num = 0, addr, k = 0;
 	}
 	if (j < n)
 		goto restart;
-	if (test) {
-		fold(resultStore[i]);
-	}
 	print_sudoku(0);
 	return;
 }
@@ -1243,6 +1235,12 @@ void Core::create_sudoku_puzzles(int block_num, int mode, int n)
 	for (i = 0; i < n; i++)
 	{
 		create_sudoku_puzzle(block_num, mode);
+		if (play) {
+			fold(resultStore[1]);
+		}
+		else if (test) {
+			fold(resultStore[i]);
+		}
 	}
 	return;
 }
@@ -1402,4 +1400,8 @@ bool Core::solve(int* puzzle, int* solution) {
 	can_solve = solve_sudoku();
 	fold(solution);
 	return can_solve;
+}
+
+void Core::set_play(bool a) {
+	play = a;
 }
