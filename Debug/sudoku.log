@@ -1,5 +1,0 @@
-﻿  sudoku.cpp
-e:\软件工程作业\sudoku\sudoku\sudoku.cpp(873): warning C4101: “temp_addr”: 未引用的局部变量
-e:\软件工程作业\sudoku\sudoku\sudoku.cpp(871): warning C4101: “j”: 未引用的局部变量
-  sudoku.vcxproj -> E:\软件工程作业\sudoku\Debug\sudoku.exe
-  sudoku.vcxproj -> E:\软件工程作业\sudoku\Debug\sudoku.pdb (Partial PDB)
