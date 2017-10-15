@@ -11,5 +11,6 @@ sudokuGUI::sudokuGUI(QWidget *parent)
 }
 
 void sudokuGUI::send() {
+	trans->writeRecord();
 	emit sureOut();
 }

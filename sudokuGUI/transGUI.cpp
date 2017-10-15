@@ -1,5 +1,6 @@
 #include "transGUI.h"
 #include <string.h>
+#include <stdio.h>
 #include <QJsonDocument>
 
 transGUI::transGUI(Ui_sudokuGUIClass UI) {
@@ -15,6 +16,43 @@ transGUI::transGUI(Ui_sudokuGUIClass UI) {
 		memset(puzzle[i], 0, sizeof(int) * 9);
 	}
 	ui.informButton->setFocusPolicy(Qt::NoFocus);
+	readRecord();
+}
+
+void transGUI::readRecord() {
+	fopen_s(&fp, "record.txt" ,"r");
+	if (!fp) {
+		fopen_s(&fp, "record.txt", "w");
+		int i = 0;
+		for (i = 0; i < 3; i++) {
+			fprintf(fp, "%d %d %d\n", 0, 0, 0);
+			recTimes[i].setHMS(0, 0, 0);
+		}
+		fclose(fp);
+	}
+	else {
+		int time[3], i = 0;
+		for (i = 0; i < 3; i++) {
+			fscanf_s(fp, "%d %d %d", &time[0], &time[1], &time[2]);
+			recTimes[i].setHMS(time[0], time[1], time[2]);
+		}
+		fclose(fp);
+	}
+	return;
+}
+
+void transGUI::writeRecord() {
+	//FILE *fp;
+	fopen_s(&fp, "record.txt", "w");
+	int time[3], i = 0;
+	for (i = 0; i < 3; i++) {
+		time[0] = recTimes[i].hour();
+		time[1] = recTimes[i].minute();
+		time[2] = recTimes[i].second();
+		fprintf(fp, "%d %d %d\n", time[0], time[1], time[2]);
+	}
+	fclose(fp);
+	return;
 }
 
 void transGUI::option() {
@@ -60,7 +98,13 @@ void transGUI::play() {
 	else {
 	}
 	ui.InformNumber->setText("");
-	ui.recordNum->setText("");
+	if (recTimes[mode - 1].hour() == 0 && recTimes[mode-1].minute() == 0 && recTimes[mode-1].second() == 0) {
+		ui.recordNum->setText(QStringLiteral("ÔÝÎÞ¼ÇÂ¼"));
+	}
+	else {
+		ui.recordNum->setText(recTimes[mode - 1].toString("HH:mm:ss"));
+	}
+	ui.recordNum->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 	ui.gridLayoutWidget->show();
 	ui.gridLayoutWidget_2 ->show();
 	ui.verticalLayoutWidget_3->show();
@@ -83,6 +127,7 @@ void transGUI::play() {
 				sudokuLineEdit[i][j] = new QLineEdit(ui.gridLayoutWidget);
 				sudokuLineEdit[i][j]->setFocusPolicy(Qt::ClickFocus);
 				sudokuLineEdit[i][j]->setObjectName(QString::number(i*9+j));
+				sudokuLineEdit[i][j]->setAlignment(Qt::AlignHCenter| Qt::AlignVCenter);
 				sudokuLineEdit[i][j]->setFixedSize(30, 30);
 				sudokuLineEdit[i][j]->setStyleSheet(QStringLiteral("font: 75 12pt \"Microsoft YaHei UI\";"));
 				ui.sudokuLayout->addWidget(sudokuLineEdit[i][j], i, j, 1, 1);
@@ -92,7 +137,7 @@ void transGUI::play() {
 				sudokuLabel[i][j] = new QLabel(ui.gridLayoutWidget);
 				sudokuLabel[i][j]->setObjectName(QStringLiteral("label"));
 				sudokuLabel[i][j]->setText(QString::number(puzzle[i][j], 10));
-				sudokuLabel[i][j]->setAlignment(Qt::AlignHCenter);
+				sudokuLabel[i][j]->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 				sudokuLabel[i][j]->setFixedSize(30, 30);
 				sudokuLabel[i][j]->setStyleSheet(QStringLiteral("font: 75 12pt \"Microsoft YaHei UI\";"));
 				ui.sudokuLayout->addWidget(sudokuLabel[i][j], i, j, 1, 1);
@@ -157,12 +202,16 @@ void transGUI::submit() {
 		}
 	}
 	if (sign == -1) {
-		ui.SubmitLabel->setText("Fail");
+		ui.SubmitLabel->setText(QStringLiteral("±§Ç¸£¬´ð°¸´íÎó"));
 	}
 	else {
-		ui.SubmitLabel->setText("Win");
-	}
+		ui.SubmitLabel->setText(QStringLiteral("¹§Ï²£¬´ð°¸ÕýÈ·"));
+		if (recTime.operator<(recTimes[mode-1]) || (recTimes[mode - 1].hour() == 0 && recTimes[mode - 1].minute() == 0 && recTimes[mode - 1].second() == 0)) {
+			recTimes[mode-1] = recTime;
+		}
 
+	}
+	//writeRecord();
 	ui.SubmitLabel->setAlignment(Qt::AlignHCenter| Qt::AlignVCenter);
 	ui.gridLayoutWidget_5->show();
 	return;

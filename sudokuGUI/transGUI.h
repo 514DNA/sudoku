@@ -15,7 +15,7 @@ public:
 	QTimer *timer;
 	QLineEdit *sudokuLineEdit[9][9];
 	transGUI(Ui_sudokuGUIClass UI);
-
+	void writeRecord();
 signals:
 	public slots:
 	void play();
@@ -35,4 +35,7 @@ private:
 	int **answer, **puzzle;
 	int mode = 0;
 	FILE *fp;
+	QTime recTimes[3];
+	void readRecord();
+
 };

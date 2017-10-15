@@ -23,4 +23,4 @@ private:
 	int str2range_num(char *str);
 	void error_out(int error);
 	void set_arg_bit_on(int mode);
-}; 
+};
