@@ -13,10 +13,6 @@ class __declspec(dllexport) Core
 public:
 	Core();
 	~Core();
-	void close_file();
-	void init_sudoku();
-	void arrange(int count);
-	int arrange_result();
 	void arrange();
 	void loadin_super_squared();
 	void back_step();
@@ -26,7 +22,7 @@ public:
 	bool solve_sudoku();
 	void create_sudoku(int n);
 	void create_test_sudoku();
-
+	int check_puzzle(int i, int j, int n);
 	void set_play(bool a);
 	void create_sudoku_puzzle(int n, int mode);
 	void create_sudoku_puzzles(int block_num, int mode, int n);
@@ -69,14 +65,16 @@ private:
 	bool play = false;
 	void unfold(int *puzzle);
 	void fold(int *solution);
-
+	void close_file();
+	void init_sudoku();
+	void arrange(int count);
+	int arrange_result();
 	void print_sudoku(int mode);
 	void print_sudoku_to_cmd();
 	void print_arrange();
 	void add_addr(int addr, int num);
 	void clear_addr(int addr);
 	int to_next(int i, int j, int n);
-	int check_puzzle(int i, int j, int n);
 	int init_check_puzzle();
 	void data_to_back();
 	void back_to_data();

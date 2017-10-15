@@ -1110,12 +1110,16 @@ int Core::can_delete_senior(int addr)
 	}
 }
 
-void Core::create_sudoku_puzzle(int n, int mode)
-{
-restart:		int i = 0, j = 0, rand_num = 0, addr, k = 0;
-	create_random_sudoku();
+void Core::create_sudoku_puzzle(int n, int mode) {
+restart:
+	int i = 0, j = 0, rand_num = 0, addr, k = 0;
+
 	if (play) {
+		create_random_sudoku();
 		fold(resultStore[0]);
+	}
+	else {
+		create_test_sudoku();
 	}
 	num_buf_length = 0;
 	for (i = 0; i < 9; i++)
@@ -1277,7 +1281,7 @@ start:
 					num_buf_length++;
 				}
 			}
-	
+
 			while (num_buf_length == 0)
 			{
 				step_num--;

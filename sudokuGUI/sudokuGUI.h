@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_sudokuGUI.h"
 #include "transGUI.h"
+#include "coreConnect.h"
 
 class sudokuGUI : public QMainWindow
 {
@@ -13,4 +14,11 @@ public:
 
 private:
 	Ui::sudokuGUIClass ui;
+	transGUI *trans;
+	coreConnect *coreCo;
+
+signals :
+	void sureOut();
+private slots:
+	void send();
 };

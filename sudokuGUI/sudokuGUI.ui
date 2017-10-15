@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>414</height>
+    <height>427</height>
    </rect>
   </property>
   <property name="cursor">
@@ -85,8 +85,11 @@
      </item>
      <item>
       <widget class="QPushButton" name="startButton">
+       <property name="cursor">
+        <cursorShape>OpenHandCursor</cursorShape>
+       </property>
        <property name="styleSheet">
-        <string notr="true">background-color: rgb(85, 170, 255);
+        <string notr="true">background-color: rgb(133, 182, 255);
 font: 75 9pt &quot;Microsoft YaHei UI&quot;;</string>
        </property>
        <property name="text">
@@ -102,56 +105,35 @@ font: 75 9pt &quot;Microsoft YaHei UI&quot;;</string>
       <x>30</x>
       <y>10</y>
       <width>411</width>
-      <height>341</height>
+      <height>351</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="sudokuLayout"/>
-   </widget>
-   <widget class="QWidget" name="verticalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>220</y>
-      <width>131</width>
-      <height>121</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="menuLayout">
-     <item>
-      <widget class="QPushButton" name="informButton">
-       <property name="text">
-        <string>提示</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="stopButton">
-       <property name="text">
-        <string>暂停</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="quitButton">
-       <property name="text">
-        <string>退出</string>
-       </property>
-      </widget>
-     </item>
+    <layout class="QGridLayout" name="sudokuLayout">
+     <property name="verticalSpacing">
+      <number>6</number>
+     </property>
     </layout>
    </widget>
    <widget class="QWidget" name="verticalLayoutWidget_3">
     <property name="geometry">
      <rect>
       <x>450</x>
-      <y>50</y>
+      <y>20</y>
       <width>131</width>
-      <height>80</height>
+      <height>231</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="recordLayout">
      <item>
       <widget class="QLabel" name="timelabel">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <pointsize>11</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>当前用时：</string>
        </property>
@@ -159,6 +141,298 @@ font: 75 9pt &quot;Microsoft YaHei UI&quot;;</string>
      </item>
      <item>
       <widget class="QLCDNumber" name="timeLcd"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="recordLabel">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <pointsize>11</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>最短用时：</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="recordNum">
+       <property name="font">
+        <font>
+         <family>Cambria</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>121423</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="InformLabel">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <pointsize>11</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>提示：</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="InformNumber">
+       <property name="font">
+        <font>
+         <family>Cambria</family>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QPushButton" name="submitButton">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>260</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Microsoft YaHei UI</family>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>OpenHandCursor</cursorShape>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 178, 90);</string>
+    </property>
+    <property name="text">
+     <string>提交</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>300</y>
+      <width>131</width>
+      <height>58</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="toolLayout">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="informButton">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>OpenHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 236, 158);</string>
+       </property>
+       <property name="text">
+        <string>提示</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="stopButton">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>OpenHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(170, 255, 127);</string>
+       </property>
+       <property name="text">
+        <string>暂停</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="backButton">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>OpenHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(170, 170, 127);</string>
+       </property>
+       <property name="text">
+        <string>返回</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="quitButton">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>OpenHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(170, 170, 255);</string>
+       </property>
+       <property name="text">
+        <string>退出</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget_3">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>120</y>
+      <width>239</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="quitLayout" rowstretch="0,0">
+     <item row="1" column="0">
+      <widget class="QPushButton" name="quitSureButton">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>OpenHandCursor</cursorShape>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(85, 170, 255);</string>
+       </property>
+       <property name="text">
+        <string>确定</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QLabel" name="quitLabel">
+       <property name="styleSheet">
+        <string notr="true">font: 75 12pt &quot;Microsoft YaHei UI&quot;;
+background-color: rgb(220, 220, 165);</string>
+       </property>
+       <property name="text">
+        <string>              确认退出？</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="quitCancelButton">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>取消</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget_5">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>120</y>
+      <width>241</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="submitLayout">
+     <item row="1" column="1">
+      <widget class="QPushButton" name="awayButton">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>不玩了</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QPushButton" name="againButton">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(85, 170, 255);</string>
+       </property>
+       <property name="text">
+        <string>再来一局</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="QLabel" name="SubmitLabel">
+       <property name="font">
+        <font>
+         <family>Microsoft YaHei UI</family>
+         <pointsize>12</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(220, 220, 165);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>

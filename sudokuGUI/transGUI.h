@@ -1,22 +1,38 @@
 #pragma once
 #include <QLineEdit>
 #include <QTimer>
+#include <QTime>
 #include <QLabel>
 #include <QString>
 #include <ui_sudokuGUI.h>
 #include <QObject>
+#include <QWidget>
+#include <QJsonArray>
+#include "generate.h"
 class transGUI : public QObject{
 	Q_OBJECT
 public:
+	QTimer *timer;
+	QLineEdit *sudokuLineEdit[9][9];
 	transGUI(Ui_sudokuGUIClass UI);
-	void mode();
-	void option();
+
 signals:
 	public slots:
 	void play();
+	void updateTime();
+	void stop();
+	void goOn();
+	void option();
+	void quit();
+	void quitCancel();
+	void inform();
+	void submit();
 private:
 	Ui_sudokuGUIClass ui;
-	QLineEdit *sudokuLineEdit[9][9];
+	Core core;
+	QTime recTime;
 	QLabel *sudokuLabel[9][9];
-	QTimer *timer;
+	int **answer, **puzzle;
+	int mode = 0;
+	FILE *fp;
 };
